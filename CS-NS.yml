@@ -1,0 +1,53 @@
+#CS-NS
+- hosts: netscaler
+  gather_facts: no
+
+  tasks:
+    - name: Set lb vserver 1
+      delegate_to: localhost
+      citrix_adc_lb_vserver: 
+        nsip: 10.36.0.216
+        nitro_user: nsroot
+        nitro_pass: nsroot
+        validate_certs: "{{ validate_certs }}"
+
+        state: present
+
+        name: lbvserver_1
+        servicetype: HTTP
+        ipv46: 5.5.5.5
+        port: 80
+   
+    - name: Set cs policy
+      delegate_to: localhost
+      citrix_adc_cs_policy: 
+        nsip: 10.36.0.216
+        nitro_user: nsroot
+        nitro_pass: nsroot
+        
+
+        state: present
+
+        policyname: policy_1
+        url: HTTP.REQ.HOSTNAME.DOMAIN.CONTAINS("ech-prueba222.e-contact.cl") 
+
+    - name: Set cs vserver
+      delegate_to: localhost
+      citrix_adc_cs_vserver:
+        nsip: 10.36.0.216
+        nitro_user: nsroot
+        nitro_pass: nsroot
+
+        state: present
+
+        name: cs-vserver-1
+        ipv46: 4.4.1.1
+        port: 90
+        servicetype: HTTP
+
+        policybindings:
+          - policyname: policy_1
+            targetlbvserver: lbvserver_1      
+
+          
+     
